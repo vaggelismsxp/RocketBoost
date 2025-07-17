@@ -55,6 +55,12 @@ public class Movement : MonoBehaviour
     }
     private void ApplyRotation(float rotationThisFrame)
     {
+        //rb.MoveRotation(Vector3.forward * rotationThisFrame * Time.fixedDeltaTime, 1);
+        //Quaternion deltaRotation = Quaternion.Euler(Vector3.forward * rotationThisFrame * Time.fixedDeltaTime);
+        //rb.MoveRotation(rb.rotation * deltaRotation);
+        
+        rb.freezeRotation = true;
         transform.Rotate(Vector3.forward * rotationThisFrame * Time.fixedDeltaTime);
+        rb.freezeRotation = false;
     }
 }
