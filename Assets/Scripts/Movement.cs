@@ -5,19 +5,25 @@ using UnityEngine.UIElements;
 
 public class Movement : MonoBehaviour
 {
+    //PARAMETERS - for tuning , typically set in the editor
     [SerializeField] InputAction thrust;
     [SerializeField] InputAction rotation;
-
     [SerializeField] float thrustStrenght = 100f;
     [SerializeField] float rotationStrenght = 100f;
+    [SerializeField] AudioClip mainEngine;
+    
 
-
-
+    //CACHE - eg. references for readability or speed
     Rigidbody rb;
+    AudioSource audioSource;
+
+    //STATE - private instances (member) variables
+    // state like : bool isAlive
 
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
+        audioSource = GetComponent<AudioSource>();
     }
     private void OnEnable()
     {
@@ -36,6 +42,11 @@ public class Movement : MonoBehaviour
         if (thrust.IsPressed())
         {
             rb.AddRelativeForce(Vector3.up * thrustStrenght * Time.fixedDeltaTime);
+            if (!audioSource.isPlaying) audioSource.PlayOneShot(mainEngine);
+        }
+        else 
+        {
+            audioSource.Stop(); 
         }
     }
     private void ProcessRotation()
@@ -44,7 +55,7 @@ public class Movement : MonoBehaviour
 
         if (rotationInput < 0)
         {
-            Debug.Log("rotation value: " + rotationInput); //Prepei na vgainei Thetiko to ANGLE afou tha pigainei sto +Z (kanonas deksiou xerioy) (opws to roloi)
+            //Prepei na vgainei Thetiko to ANGLE afou tha pigainei sto +Z (kanonas deksiou xerioy) (opws to roloi)
             ApplyRotation(rotationStrenght);
         }
         else if (rotationInput > 0)
