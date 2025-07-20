@@ -10,8 +10,10 @@ public class Movement : MonoBehaviour
     [SerializeField] InputAction rotation;
     [SerializeField] float thrustStrenght = 100f;
     [SerializeField] float rotationStrenght = 100f;
-    [SerializeField] AudioClip mainEngine;
-    
+    [SerializeField] AudioClip mainEngineSFX;
+    [SerializeField] ParticleSystem rightThrustParticles;
+    [SerializeField] ParticleSystem leftThrustParticles;
+    [SerializeField] ParticleSystem mainEngineParticles;
 
     //CACHE - eg. references for readability or speed
     Rigidbody rb;
@@ -41,29 +43,71 @@ public class Movement : MonoBehaviour
     {
         if (thrust.IsPressed())
         {
-            rb.AddRelativeForce(Vector3.up * thrustStrenght * Time.fixedDeltaTime);
-            if (!audioSource.isPlaying) audioSource.PlayOneShot(mainEngine);
+            StartThrusting();
         }
-        else 
+        else
         {
-            audioSource.Stop(); 
+            StopThrusting();
         }
     }
+    private void StartThrusting()
+    {
+        rb.AddRelativeForce(Vector3.up * thrustStrenght * Time.fixedDeltaTime);
+        if (!audioSource.isPlaying) audioSource.PlayOneShot(mainEngineSFX);
+        if (!mainEngineParticles.isPlaying) mainEngineParticles.Play();
+    }
+    private void StopThrusting()
+    {
+        mainEngineParticles.Stop();
+        audioSource.Stop();
+    }
+
+    
+
     private void ProcessRotation()
     {
         float rotationInput = rotation.ReadValue<float>();
 
         if (rotationInput < 0)
         {
-            //Prepei na vgainei Thetiko to ANGLE afou tha pigainei sto +Z (kanonas deksiou xerioy) (opws to roloi)
-            ApplyRotation(rotationStrenght);
+            RotateRight();
         }
         else if (rotationInput > 0)
-        { //prepei na einai arnitiko ANGLE afou paei sto -z (anapoda apo to roloi)
-            ApplyRotation(-rotationStrenght);
+        {
+            RotateLeft();
+        }
+        else
+        {
+            StopTurning();
         }
 
     }
+    private void RotateRight()
+    {
+        ApplyRotation(rotationStrenght);
+        //Prepei na vgainei Thetiko to ANGLE afou tha pigainei sto +Z (kanonas deksiou xerioy) (opws to roloi)
+        if (!leftThrustParticles.isPlaying)
+        {
+            rightThrustParticles.Stop();
+            leftThrustParticles.Play();
+        }
+    }
+    private void RotateLeft()
+    {
+        ApplyRotation(-rotationStrenght);
+        //prepei na einai arnitiko ANGLE afou paei sto -z (anapoda apo to roloi)
+        if (!rightThrustParticles.isPlaying)
+        {
+            leftThrustParticles.Stop();
+            rightThrustParticles.Play();
+        }
+    }
+    private void StopTurning()
+    {
+        leftThrustParticles.Stop();
+        rightThrustParticles.Stop();
+    }
+
     private void ApplyRotation(float rotationThisFrame)
     {
         //rb.MoveRotation(Vector3.forward * rotationThisFrame * Time.fixedDeltaTime, 1);
@@ -73,5 +117,6 @@ public class Movement : MonoBehaviour
         rb.freezeRotation = true;
         transform.Rotate(Vector3.forward * rotationThisFrame * Time.fixedDeltaTime);
         rb.freezeRotation = false;
+        
     }
 }

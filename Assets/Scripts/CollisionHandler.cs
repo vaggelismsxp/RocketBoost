@@ -1,25 +1,42 @@
 using System;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 public class CollisionHandler : MonoBehaviour
 {
     [SerializeField] float invokeDelayNextLevel;
     [SerializeField] float invokeDelayReloadLevel;
-    [SerializeField] AudioClip crashAudio;
-    [SerializeField] AudioClip passAudio;
+    [SerializeField] AudioClip crashSFX;
+    [SerializeField] AudioClip successSFX;
+    [SerializeField] ParticleSystem successParticles;
+    [SerializeField] ParticleSystem crashParticles;
 
     AudioSource audioSource;
+
+    bool isControllable = true;
     private void Start()
     {
         audioSource = GetComponent<AudioSource>();
+        
     }
-
+    private void Update()
+    {
+        RespondToDebugKeys();
+    }
+    private void RespondToDebugKeys() 
+    {
+        if (Keyboard.current.lKey.isPressed) 
+        {
+            LoadNextLevel();
+        }
+    }
     private void OnCollisionEnter(Collision other)
     {
+        if (!isControllable) {return;}
 
-        switch (other.gameObject.tag) 
+        switch (other.gameObject.tag)
         {
             case "Friendly":
                 Debug.Log("Omygod its so hard");
@@ -38,23 +55,28 @@ public class CollisionHandler : MonoBehaviour
     }
     void AudioMethod(AudioClip audio) 
     {
+        audioSource.Stop();
         audioSource.PlayOneShot(audio);
     }
 
     private void StartPassLevelSequence()
     {
-        // TODO add sfx and particles
-        AudioMethod(passAudio);
+        isControllable = false;
 
+        // TODO add sfx and particles
+        AudioMethod(successSFX);
+        successParticles.Play();
         GetComponent<Movement>().enabled = false;
         Invoke("LoadNextLevel", invokeDelayNextLevel);
     }
 
     void StartCrashSequence()
     {
-        //TODO add sfx and particles
-        AudioMethod(crashAudio);
+        isControllable = false;
 
+        //TODO add sfx and particles
+        AudioMethod(crashSFX);
+        crashParticles.Play();
         GetComponent<Movement>().enabled = false;
         Invoke("ReloadLevel", invokeDelayReloadLevel);
     }
