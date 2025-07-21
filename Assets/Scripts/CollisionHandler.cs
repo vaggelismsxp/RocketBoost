@@ -16,6 +16,7 @@ public class CollisionHandler : MonoBehaviour
     AudioSource audioSource;
 
     bool isControllable = true;
+    bool isCollidable = true;
     private void Start()
     {
         audioSource = GetComponent<AudioSource>();
@@ -27,14 +28,18 @@ public class CollisionHandler : MonoBehaviour
     }
     private void RespondToDebugKeys() 
     {
-        if (Keyboard.current.lKey.isPressed) 
+        if (Keyboard.current.lKey.wasPressedThisFrame) 
         {
             LoadNextLevel();
+        }else if (Keyboard.current.cKey.wasPressedThisFrame) 
+        {
+            Debug.Log("you are uncollidable");
+            isCollidable = !isCollidable;
         }
     }
     private void OnCollisionEnter(Collision other)
     {
-        if (!isControllable) {return;}
+        if (!isControllable || !isCollidable) {return;}
 
         switch (other.gameObject.tag)
         {
